@@ -1,5 +1,5 @@
-#ifndef PTSolns_InterfaceShield_h
-#define PTSolns_InterfaceShield_h
+#ifndef PTSolns_I2CBackpack_h
+#define PTSolns_I2CBackpack_h
 #endif
 #include <Arduino.h>
 #include <Wire.h>
