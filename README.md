@@ -1,3 +1,3 @@
 # PTSolns I2C Backpack
 
-Library for PTSolns Interface-Shield
+Library for PTSolns I2C Backpack
