@@ -1,9 +1,4 @@
-// Special thanks to our "You rock, Hall of Fame" Kickstarter supporters:
-// Guy Pilens
-// Megan
-// David G. Simpson
-
-#include "PTSolns_InterfaceShield.h"
+#include "PTSolns_I2CBackpack.h"
 
 #include <stdio.h>
 #include <string.h>
