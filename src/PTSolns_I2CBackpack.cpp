@@ -31,7 +31,7 @@ void Interface::init(uint8_t fourbitmode, uint8_t rs, uint8_t rw, uint8_t enable
   else 
     _displayfunction = LCD_8BITMODE | LCD_1LINE | LCD_5x8DOTS;
   
-  beginLCD(16, 1);  
+  beginLCD(20, 4);  
 }
 
 void Interface::beginLCD(uint8_t cols, uint8_t lines, uint8_t dotsize) {
@@ -40,7 +40,8 @@ void Interface::beginLCD(uint8_t cols, uint8_t lines, uint8_t dotsize) {
   }
   _numlines = lines;
 
-  setRowOffsets(0x00, 0x40, 0x00 + cols, 0x40 + cols);  
+  //   setRowOffsets(0x00, 0x40, 0x00 + cols, 0x40 + cols);  
+  setRowOffsets(0x00, 0x40, 0x14, 0x54);  // For 2004 LCD
 
   // for some 1 line displays you can select a 10 pixel high font
   if ((dotsize != LCD_5x8DOTS) && (lines == 1)) {
@@ -290,13 +291,12 @@ void Interface::write8bits(uint8_t value) {
 
 uint8_t Interface::begin()
 {
-    InitialSetup();
-    return 0;
+    return InitialSetup();
 }
 
 uint8_t Interface::begin(uint8_t addr)
 {
-    if(0x20 <= addr && 0x27 >= addr)
+    if(0x30 <= addr && 0X3F >= addr)
         this->addr = addr;
     else
         return 2;
@@ -316,59 +316,6 @@ uint8_t Interface::backlight(bool state)
     return (err > 0) * 10;
 }
 
-
-void Interface::interrupt(bool state)
-{
-    pinMode(2, state ? INPUT_PULLUP : INPUT);
-}
-
-
-uint8_t Interface::digitalWrite(uint8_t pin, bool value)
-{
-    if(pin > 3) return 40;
-    uint8_t pin1 = pin + 8;
-    if(value == LOW)        // Reverse Polarity
-    {
-        this->output.w |= (1 << pin1);
-    }
-    else
-    {
-        this->output.w &= ~(1 << pin1);
-    }
-    return write_impl() * 40;
-}
-
-bool Interface::digitalRead(uint8_t pin)
-{
-    if(pin > 3) return 0;
-    uint8_t pin1 = pin + 8 + 4;
-    uint16_t v = read();
-    bool readState = ! ((v & (1 << pin1)) ? HIGH : LOW);
-
-    if(!debounceEnabled) return readState;
-    
-    unsigned int timeNow = millis();
-    if((timeNow - btnTimes[pin]) > debounceTime)
-    {
-      btnTimes[pin] = timeNow;
-      btnStates[pin] = readState;
-    }
-    return btnStates[pin];
-}
-
-void Interface::debounce(bool state, int ms)
-{
-    debounceEnabled = state;
-    debounceTime = ms;
-}
-
-void Interface::debounce(bool state)
-{
-    debounceEnabled = state;
-}
-
-
-
 uint8_t Interface::InitialSetup()
 {
     int err = 0;
@@ -384,7 +331,7 @@ uint8_t Interface::InitialSetup()
     
     setClock(100000L);
     init(1, 0, 1, 2, 4, 5, 6, 7, 0, 0, 0, 0);
-    beginLCD(16, 2);
+    beginLCD(20, 4);
     return (err > 0) * 1;
 }
 

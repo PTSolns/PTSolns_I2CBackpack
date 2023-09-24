@@ -44,20 +44,8 @@
 #define LCD_5x10DOTS 0x04
 #define LCD_5x8DOTS 0x00
 
-// user input / output
-#define LED1 0
-#define LED2 1
-#define LED3 2
-#define LED4 3
-
-#define B1 0
-#define B2 1
-#define B3 2
-#define B4 3
-
 #define ON 1
 #define OFF 0
-
 
 
 namespace Reg 
@@ -109,11 +97,6 @@ class Interface : public Print
     uint8_t begin();
     uint8_t begin(uint8_t addr);
     uint8_t backlight(bool state);
-    void interrupt(bool state);
-    uint8_t digitalWrite(uint8_t pin, bool value);
-    bool digitalRead(uint8_t pin);
-    void debounce(bool enabled, int ms);
-    void debounce(bool enabled);
     void setClock(unsigned long speed);
 
     void clear();
@@ -142,18 +125,13 @@ class Interface : public Print
 
     private:
 
-    unsigned long btnTimes[4] = {0, 0, 0, 0};
-    bool btnStates[4] = {LOW, LOW, LOW, LOW};
-    int debounceTime = 100;
-    bool debounceEnabled = false;
-
     union Ports 
     {
         uint16_t w;
         uint8_t b[2];
     };
 
-    uint8_t addr = 0x27;
+    uint8_t addr = 0x3F;
     Ports input {0x0000};
     Ports output {0xFFFF};
     Ports pol {0x0000};
