@@ -318,21 +318,10 @@ uint8_t Interface::backlight(bool state)
 
 uint8_t Interface::InitialSetup()
 {
-    int err = 0;
-    err += ExpanderPinMode(8,  OUTPUT);
-    err += ExpanderPinMode(9,  OUTPUT);
-    err += ExpanderPinMode(10, OUTPUT);
-    err += ExpanderPinMode(11, OUTPUT);
-    
-    err += ExpanderPinMode(12, INPUT);
-    err += ExpanderPinMode(13, INPUT);
-    err += ExpanderPinMode(14, INPUT);
-    err += ExpanderPinMode(15, INPUT);
-    
     setClock(100000L);
     init(1, 0, 1, 2, 4, 5, 6, 7, 0, 0, 0, 0);
     beginLCD(20, 4);
-    return (err > 0) * 1;
+    return 0;
 }
 
 bool Interface::ExpanderPinMode(uint8_t pin, uint8_t mode)
