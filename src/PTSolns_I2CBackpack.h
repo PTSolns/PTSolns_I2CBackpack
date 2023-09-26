@@ -47,45 +47,13 @@
 #define ON 1
 #define OFF 0
 
+#define INPUTPORT	0x00
+#define OUTPUTPORT	0x01
+#define POLINVPORT	0x02
+#define CONFIGPORT	0x03
 
-namespace Reg 
-{
-    enum : uint8_t 
-    {
-        INPUT_PORT_0,
-        INPUT_PORT_1,
-        OUTPUT_PORT_0,
-        OUTPUT_PORT_1,
-        POLARITY_INVERSION_PORT_0,
-        POLARITY_INVERSION_PORT_1,
-        CONFIGURATION_PORT_0,
-        CONFIGURATION_PORT_1,
-    };
-}
-
-namespace Port 
-{
-    enum Port : uint8_t 
-    {P00, P01, P02, P03, P04, P05, P06, P07, P10, P11, P12, P13, P14, P15, P16, P17,};
-}  // namespace Port
-
-namespace Level 
-{
-    enum Level : uint8_t { L, H };
-    enum LevelAll : uint16_t { L_ALL = 0x0000, H_ALL = 0xFFFF };
-}  // namespace Level
-
-namespace Polarity 
-{
-    enum Polarity : uint8_t { ORIGINAL, INVERTED };
-    enum PolarityAll : uint16_t { ORIGINAL_ALL = 0x0000, INVERTED_ALL = 0xFFFF };
-}  // namespace Polarity
-
-namespace Direction 
-{
-    enum Direction : uint8_t { OUT, IN };
-    enum DirectionAll : uint16_t { OUT_ALL = 0x0000, IN_ALL = 0xFFFF };
-}  // namespace Direction
+#define ALLOUTPUT	0x00
+#define ALLINPUT	0xFF
 
 
 class Interface : public Print
@@ -153,20 +121,12 @@ class Interface : public Print
     uint8_t _numlines;
     uint8_t _row_offsets[4];
     
-    
-    Level::Level read(const Port::Port port) 
-    {
-        uint16_t v = read();
-        return (v & (1 << port)) ? Level::H : Level::L;
-    }
-    
-    
     bool write_impl();
     bool polarity_impl();
     bool direction_impl();
 
     int8_t read_bytes(const uint8_t dev, const uint8_t reg, uint8_t* data, const uint8_t size);
-    bool write_bytes(const uint8_t dev, const uint8_t reg, const uint8_t* data, const uint8_t size);
+    bool write_byte(const uint8_t dev, const uint8_t reg, const uint8_t data);
     
     void send(uint8_t, uint8_t);
     void write4bits(uint8_t);
@@ -178,23 +138,11 @@ class Interface : public Print
     bool ExpanderPinMode(uint8_t pin, uint8_t mode);    
     uint8_t PinWrite(uint8_t pin, bool value);
     uint16_t read();
-
-    bool write(const uint16_t value);
-    bool write(const Port::Port port, const Level::Level level);
-
-    bool polarity(const uint16_t value);
-    bool polarity(const Port::Port port, const Polarity::Polarity pol);
-
-    bool direction(const uint16_t value);
-    bool direction(const Port::Port port, const Direction::Direction dir);
     
     void init(uint8_t fourbitmode, uint8_t rs, uint8_t rw, uint8_t enable,
 	    uint8_t d0, uint8_t d1, uint8_t d2, uint8_t d3,
 	    uint8_t d4, uint8_t d5, uint8_t d6, uint8_t d7);
     
-    void beginLCD(uint8_t cols, uint8_t rows, uint8_t charsize = LCD_5x8DOTS);
-
-    
-    
+    void beginLCD(uint8_t cols, uint8_t rows, uint8_t charsize = LCD_5x8DOTS);    
     
 };

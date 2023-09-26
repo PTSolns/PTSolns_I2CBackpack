@@ -286,7 +286,7 @@ void Interface::write8bits(uint8_t value) {
 }
 
 
-//-------------------------------------PCA9535 Instruction Set-----------------------------------------------------
+//-------------------------------------PCA9554A Instruction Set-----------------------------------------------------
 
 
 uint8_t Interface::begin()
@@ -350,76 +350,23 @@ uint8_t Interface::PinWrite(uint8_t pin, bool value)
 }
 
 uint16_t Interface::read() {
-    read_bytes(this->addr, Reg::INPUT_PORT_0, this->input.b, 2);
+    read_bytes(this->addr, INPUTPORT, this->input.b, 1);
     return this->input.w;
 }
 
-bool Interface::write(const uint16_t value) 
-{
-    this->output.w = value;
-    return write_impl();
-}
-bool Interface::write(const Port::Port port, const Level::Level level) 
-{
-    if (level == Level::H) 
-    {
-        this->output.w |= (1 << port);
-    } else 
-    {
-        this->output.w &= ~(1 << port);
-    }
-    return write_impl();
-}
-
-bool Interface::polarity(const uint16_t value) 
-{
-    this->pol.w = value;
-    return polarity_impl();
-}
-bool Interface::polarity(const Port::Port port, const Polarity::Polarity pol) 
-{
-    if (pol == Polarity::INVERTED) 
-    {
-        this->pol.w |= (1 << port);
-    } else 
-    {
-        this->pol.w &= ~(1 << port);
-    }
-    return polarity_impl();
-}
-
-bool Interface::direction(const uint16_t value) 
-{
-    this->dir.w = value;
-    return direction_impl();
-}
-
-bool Interface::direction(const Port::Port port, const Direction::Direction dir) 
-{
-    if (dir == Direction::IN) 
-    {
-        this->dir.w |= (1 << port);
-    } else 
-    {
-        this->dir.w &= ~(1 << port);
-    }
-    return direction_impl();
-}
-
-
 bool Interface::write_impl() 
 {
-    return write_bytes(this->addr, Reg::OUTPUT_PORT_0, this->output.b, 2);
+    return write_byte(this->addr, OUTPUTPORT, this->output.b);
 }
 
 bool Interface::polarity_impl() 
 {
-    return write_bytes(this->addr, Reg::POLARITY_INVERSION_PORT_0, this->pol.b, 2);
+    return write_byte(this->addr, POLINVPORT, this->pol.b);
 }
 
 bool Interface::direction_impl() 
 {
-    return write_bytes(this->addr, Reg::CONFIGURATION_PORT_0, this->dir.b, 2);
+    return write_byte(this->addr, CONFIGPORT, this->dir.b);
 }
 
 int8_t Interface::read_bytes(const uint8_t dev, const uint8_t reg, uint8_t* data, const uint8_t size) 
@@ -433,11 +380,11 @@ int8_t Interface::read_bytes(const uint8_t dev, const uint8_t reg, uint8_t* data
     return count;
 }
 
-bool Interface::write_bytes(const uint8_t dev, const uint8_t reg, const uint8_t* data, const uint8_t size) 
+bool Interface::write_byte(const uint8_t dev, const uint8_t reg, const uint8_t data) 
 {
     Wire.beginTransmission(dev);
     Wire.write(reg);
-    for (uint8_t i = 0; i < size; i++) Wire.write(data[i]);
+    Wire.write(data);
     status = Wire.endTransmission();
     return (status == 0);
 }
