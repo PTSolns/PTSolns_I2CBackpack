@@ -9,9 +9,44 @@
 //-------------------------------------Display Driver-----------------------------------------------------
 
 
-void Interface::init(uint8_t fourbitmode, uint8_t rs, uint8_t rw, uint8_t enable,
-			 uint8_t d0, uint8_t d1, uint8_t d2, uint8_t d3,
-			 uint8_t d4, uint8_t d5, uint8_t d6, uint8_t d7)
+// When the display powers up, it is configured as follows:
+//
+// 1. Display clear
+// 2. Function set: 
+//    DL = 1; 8-bit interface data 
+//    N = 0; 1-line display 
+//    F = 0; 5x8 dot character font 
+// 3. Display on/off control: 
+//    D = 0; Display off 
+//    C = 0; Cursor off 
+//    B = 0; Blinking off 
+// 4. Entry mode set: 
+//    I/D = 1; Increment by 1 
+//    S = 0; No shift 
+//
+// Note, however, that resetting the Arduino doesn't reset the LCD, so we
+// can't assume that it's in that state when a sketch starts (and the
+// LiquidCrystal constructor is called).
+
+
+void Interface::LiquidCrystal(uint8_t rs, uint8_t rw, uint8_t enable, uint8_t d0, uint8_t d1, uint8_t d2, uint8_t d3)
+{
+  init(1, rs, rw, enable, d0, d1, d2, d3, 0, 0, 0, 0);
+}
+
+
+void Interface::setLCD(bool lcdType)
+{
+    this->lcdType = lcdType;
+    
+    if(lcdType == LCD_2004)
+        beginLCD(20, 4);
+    else
+        beginLCD(16, 2);
+}
+
+
+void Interface::init(uint8_t fourbitmode, uint8_t rs, uint8_t rw, uint8_t enable, uint8_t d0, uint8_t d1, uint8_t d2, uint8_t d3, uint8_t d4, uint8_t d5, uint8_t d6, uint8_t d7)
 {
   _rs_pin = rs;
   _rw_pin = rw;
@@ -31,7 +66,7 @@ void Interface::init(uint8_t fourbitmode, uint8_t rs, uint8_t rw, uint8_t enable
   else 
     _displayfunction = LCD_8BITMODE | LCD_1LINE | LCD_5x8DOTS;
   
-  beginLCD(20, 4);  
+  beginLCD(16, 1);
 }
 
 void Interface::beginLCD(uint8_t cols, uint8_t lines, uint8_t dotsize) {
@@ -40,25 +75,24 @@ void Interface::beginLCD(uint8_t cols, uint8_t lines, uint8_t dotsize) {
   }
   _numlines = lines;
 
-  //   setRowOffsets(0x00, 0x40, 0x00 + cols, 0x40 + cols);  
-  setRowOffsets(0x00, 0x40, 0x14, 0x54);  // For 2004 LCD
+  setRowOffsets(0x00, 0x40, 0x00 + cols, 0x40 + cols);  
 
   // for some 1 line displays you can select a 10 pixel high font
   if ((dotsize != LCD_5x8DOTS) && (lines == 1)) {
     _displayfunction |= LCD_5x10DOTS;
   }
 
-  this->ExpanderPinMode(_rs_pin, OUTPUT);
+  this->pinMode(_rs_pin, OUTPUT);
   // we can save 1 pin by not using RW. Indicate by passing 255 instead of pin#
   if (_rw_pin != 255) { 
-    this->ExpanderPinMode(_rw_pin, OUTPUT);
+    this->pinMode(_rw_pin, OUTPUT);
   }
-  this->ExpanderPinMode(_enable_pin, OUTPUT);
+  this->pinMode(_enable_pin, OUTPUT);
   
   // Do these once, instead of every time a character is drawn for speed reasons.
   for (int i=0; i<((_displayfunction & LCD_8BITMODE) ? 8 : 4); ++i)
   {
-    this->ExpanderPinMode(_data_pins[i], OUTPUT);
+    this->pinMode(_data_pins[i], OUTPUT);
    } 
 
   // SEE PAGE 45/46 FOR INITIALIZATION SPECIFICATION!
@@ -66,10 +100,10 @@ void Interface::beginLCD(uint8_t cols, uint8_t lines, uint8_t dotsize) {
   // before sending commands. Arduino can turn on way before 4.5 V so we'll wait 50
   delayMicroseconds(50000); 
   // Now we pull both RS and R/W low to begin commands
-  this->PinWrite(_rs_pin, LOW);
-  this->PinWrite(_enable_pin, LOW);
+  this->digitalWrite(_rs_pin, LOW);
+  this->digitalWrite(_enable_pin, LOW);
   if (_rw_pin != 255) { 
-    this->PinWrite(_rw_pin, LOW);
+    this->digitalWrite(_rw_pin, LOW);
   }
   
   //put the LCD into 4 bit or 8 bit mode
@@ -245,11 +279,11 @@ inline size_t Interface::write(uint8_t value) {
 
 // write either command or data, with automatic 4/8-bit selection
 void Interface::send(uint8_t value, uint8_t mode) {
-  this->PinWrite(_rs_pin, mode);
+  this->digitalWrite(_rs_pin, mode);
 
   // if there is a RW pin indicated, set it low to Write
   if (_rw_pin != 255) { 
-    this->PinWrite(_rw_pin, LOW);
+    this->digitalWrite(_rw_pin, LOW);
   }
   
   if (_displayfunction & LCD_8BITMODE) {
@@ -261,17 +295,17 @@ void Interface::send(uint8_t value, uint8_t mode) {
 }
 
 void Interface::pulseEnable(void) {
-  this->PinWrite(_enable_pin, LOW);
+  this->digitalWrite(_enable_pin, LOW);
   delayMicroseconds(1);    
-  this->PinWrite(_enable_pin, HIGH);
+  this->digitalWrite(_enable_pin, HIGH);
   delayMicroseconds(1);    // enable pulse must be >450 ns
-  this->PinWrite(_enable_pin, LOW);
+  this->digitalWrite(_enable_pin, LOW);
   delayMicroseconds(100);   // commands need >37 us to settle
 }
 
 void Interface::write4bits(uint8_t value) {
   for (int i = 0; i < 4; i++) {
-    this->PinWrite(_data_pins[i], (value >> i) & 0x01);
+    this->digitalWrite(_data_pins[i], (value >> i) & 0x01);
   }
 
   pulseEnable();
@@ -279,7 +313,7 @@ void Interface::write4bits(uint8_t value) {
 
 void Interface::write8bits(uint8_t value) {
   for (int i = 0; i < 8; i++) {
-    this->PinWrite(_data_pins[i], (value >> i) & 0x01);
+    this->digitalWrite(_data_pins[i], (value >> i) & 0x01);
   }
   
   pulseEnable();
@@ -311,80 +345,133 @@ void Interface::setClock(unsigned long speed)
 uint8_t Interface::backlight(bool state)
 {
     int err = 0;
-    err += ExpanderPinMode(3, OUTPUT);
-    err += PinWrite(3, state);
+    err += this->pinMode(3, OUTPUT);
+    err += digitalWrite(3, state);
     return (err > 0) * 10;
 }
 
 uint8_t Interface::InitialSetup()
 {
     setClock(100000L);
-    init(1, 0, 1, 2, 4, 5, 6, 7, 0, 0, 0, 0);
-    beginLCD(20, 4);
+    LiquidCrystal(0, 1, 2, 4, 5, 6, 7);
+    
+    if(lcdType == LCD_2004)
+      beginLCD(20, 4);
+    else
+      beginLCD(16, 2);
     return 0;
 }
 
-bool Interface::ExpanderPinMode(uint8_t pin, uint8_t mode)
+bool Interface::twiRead(byte &registerAddress)
 {
-    if (mode == INPUT) 
-    {
-        this->dir.w |= (1 << pin);
-    } else 
-    {
-        this->dir.w &= ~(1 << pin);
-    }
-    return direction_impl();
+	Wire.beginTransmission(addr);
+  	Wire.write(registerAddress);
+
+  	if(Wire.endTransmission() == 0)
+  	{
+    		delay(15);
+    		Wire.requestFrom(addr, 1, true);
+    		while(Wire.available() < 1);
+    		registerAddress = Wire.read();
+    		return true;
+  	}
+  	return false;
 }
 
-uint8_t Interface::PinWrite(uint8_t pin, bool value)
+bool Interface::twiWrite(byte registerAddress, byte dataWrite)
 {
-    if(value == HIGH)
-    {
-        this->output.w |= (1 << pin);
-    }
-    else
-    {
-        this->output.w &= ~(1 << pin);
-    }
-    return write_impl() * 40;
+	Wire.beginTransmission(addr);
+  	Wire.write(registerAddress);
+  	Wire.write(dataWrite);
+
+  	if(Wire.endTransmission() == 0)
+    		return true;
+  	return false;
 }
 
-uint16_t Interface::read() {
-    read_bytes(this->addr, INPUTPORT, this->input.b, 1);
-    return this->input.w;
+bool Interface::pinMode(byte pinNumber, bool state)
+{
+	byte oldValue = CONFIGPORT;
+	if(this->twiRead(oldValue) && (pinNumber <= 7))
+	{
+		if(!state)
+		{
+			oldValue |= (1 << pinNumber);
+			if(this->portMode(oldValue))
+				return true;
+			return false;
+		}
+		else if(state)
+		{
+			oldValue &= ~(1 << pinNumber);
+			if(this->portMode(oldValue))
+				return true;
+			return false;
+		}
+	}
+	return false;
 }
 
-bool Interface::write_impl() 
+bool Interface::portMode(byte value)
 {
-    return write_byte(this->addr, OUTPUTPORT, this->output.b);
+	if(this->twiWrite(CONFIGPORT, value))
+		return true;
+	return false;
 }
 
-bool Interface::polarity_impl() 
+
+bool Interface::digitalWrite(byte pinNumber, bool state)
 {
-    return write_byte(this->addr, POLINVPORT, this->pol.b);
+	byte oldValue = OUTPUTPORT;
+	if(pinNumber <= 7)
+	{
+		if(state)
+		{
+			portsOutput |= (1 << pinNumber);
+			if(this->digitalWritePort(portsOutput))
+				return true;
+			return false;
+		}
+		else if(!state)
+		{
+			portsOutput &= ~(1 << pinNumber);
+			if(this->digitalWritePort(portsOutput))
+				return true;
+			return false;
+		}
+	}
+	return false;
 }
 
-bool Interface::direction_impl() 
+
+
+bool Interface::digitalWritePort(byte value)
 {
-    return write_byte(this->addr, CONFIGPORT, this->dir.b);
+	if(this->twiWrite(OUTPUTPORT, value))
+		return true;
+	return false;
 }
 
-int8_t Interface::read_bytes(const uint8_t dev, const uint8_t reg, uint8_t* data, const uint8_t size) 
+
+
+bool Interface::digitalRead(byte &pinNumber)
 {
-    Wire.beginTransmission(dev);
-    Wire.write(reg);
-    Wire.endTransmission();
-    Wire.requestFrom(dev, size);
-    int8_t count = 0;
-    while (Wire.available()) data[count++] = Wire.read();
-    return count;
+	byte oldValue = INPUTPORT;
+	if(this->twiRead(oldValue) && (pinNumber <= 7))
+	{
+		oldValue &= (1 << pinNumber);
+		if(oldValue > 0) pinNumber = 1;
+		else pinNumber = 0;
+		return true;
+	}
+	return false;
 }
 
-bool Interface::write_byte(const uint8_t dev, const uint8_t reg, const uint8_t data) 
+
+bool Interface::digitalReadPort(byte &value)
 {
-    Wire.beginTransmission(dev);
-    Wire.write(reg);
-    Wire.write(data);
-    status = Wire.endTransmission();
-    return (status == 0);
+	value = INPUTPORT;
+	if(this->twiRead(value))
+		return true;
+	return false;
 }

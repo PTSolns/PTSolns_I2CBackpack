@@ -7,6 +7,9 @@ void setup()
     interface.begin();   // default 0x3F, comment to change address
     // interface.begin(0x3F);   // uncomment to change address
     
+    // interface.setLCD(LCD_1602);
+    interface.setLCD(LCD_2004);
+    
     interface.backlight(ON);
     interface.clear();
     interface.setCursor(0, 0);

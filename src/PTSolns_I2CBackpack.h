@@ -47,6 +47,9 @@
 #define ON 1
 #define OFF 0
 
+#define LCD_1602 0
+#define LCD_2004 1
+
 #define INPUTPORT	0x00
 #define OUTPUTPORT	0x01
 #define POLINVPORT	0x02
@@ -64,6 +67,7 @@ class Interface : public Print
     
     uint8_t begin();
     uint8_t begin(uint8_t addr);
+    void setLCD(bool lcdType);
     uint8_t backlight(bool state);
     void setClock(unsigned long speed);
 
@@ -93,19 +97,11 @@ class Interface : public Print
 
     private:
 
-    union Ports 
-    {
-        uint16_t w;
-        uint8_t b[2];
-    };
-
     uint8_t addr = 0x3F;
-    Ports input {0x0000};
-    Ports output {0xFFFF};
-    Ports pol {0x0000};
-    Ports dir {0xFFFF};
-    uint8_t status {0x00};
     
+    byte portsOutput = 0;
+    
+    bool lcdType = LCD_2004;
     
     uint8_t _rs_pin; // LOW: command. HIGH: character.
     uint8_t _rw_pin; // LOW: write to LCD. HIGH: read from LCD.
@@ -121,13 +117,6 @@ class Interface : public Print
     uint8_t _numlines;
     uint8_t _row_offsets[4];
     
-    bool write_impl();
-    bool polarity_impl();
-    bool direction_impl();
-
-    int8_t read_bytes(const uint8_t dev, const uint8_t reg, uint8_t* data, const uint8_t size);
-    bool write_byte(const uint8_t dev, const uint8_t reg, const uint8_t data);
-    
     void send(uint8_t, uint8_t);
     void write4bits(uint8_t);
     void write8bits(uint8_t);
@@ -135,14 +124,21 @@ class Interface : public Print
     
     
     uint8_t InitialSetup();    
-    bool ExpanderPinMode(uint8_t pin, uint8_t mode);    
-    uint8_t PinWrite(uint8_t pin, bool value);
-    uint16_t read();
+        
+    void LiquidCrystal(uint8_t rs, uint8_t rw, uint8_t enable, uint8_t d0, uint8_t d1, uint8_t d2, uint8_t d3);
+    void init(uint8_t fourbitmode, uint8_t rs, uint8_t rw, uint8_t enable, uint8_t d0, uint8_t d1, uint8_t d2, uint8_t d3, uint8_t d4, uint8_t d5, uint8_t d6, uint8_t d7);
     
-    void init(uint8_t fourbitmode, uint8_t rs, uint8_t rw, uint8_t enable,
-	    uint8_t d0, uint8_t d1, uint8_t d2, uint8_t d3,
-	    uint8_t d4, uint8_t d5, uint8_t d6, uint8_t d7);
+    void beginLCD(uint8_t cols, uint8_t rows, uint8_t charsize = LCD_5x8DOTS);  
     
-    void beginLCD(uint8_t cols, uint8_t rows, uint8_t charsize = LCD_5x8DOTS);    
+    bool twiRead(byte &registerAddress);
+    bool twiWrite(byte registerAddress, byte dataWrite);
+
+    bool pinMode(byte pinNumber, bool state);
+    bool portMode(byte value);
     
+    bool digitalWrite(byte pinNumber, bool state);
+    bool digitalWritePort(byte value);
+            
+    bool digitalRead(byte &pinNumber);
+    bool digitalReadPort(byte &value);
 };
