@@ -1,0 +1,43 @@
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+Interface KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+begin KEYWORD2
+begin KEYWORD2
+setLCD KEYWORD2
+backlight KEYWORD2
+setClock KEYWORD2
+clear KEYWORD2
+home KEYWORD2
+noDisplay KEYWORD2
+display KEYWORD2
+noBlink KEYWORD2
+blink KEYWORD2
+noCursor KEYWORD2
+cursor KEYWORD2
+scrollDisplayLeft KEYWORD2
+scrollDisplayRight KEYWORD2
+leftToRight KEYWORD2
+rightToLeft KEYWORD2
+autoscroll KEYWORD2
+noAutoscroll KEYWORD2
+setRowOffsets KEYWORD2
+createChar KEYWORD2
+setCursor KEYWORD2
+write KEYWORD2
+command KEYWORD2
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+
+ON LITERAL1
+OFF LITERAL1
+LCD_1602 LITERAL1
+LCD_2004 LITERAL1
