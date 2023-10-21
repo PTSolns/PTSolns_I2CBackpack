@@ -133,12 +133,12 @@ class Interface : public Print
     bool twiRead(byte &registerAddress);
     bool twiWrite(byte registerAddress, byte dataWrite);
 
-    bool pinMode(byte pinNumber, bool state);
+    bool pinnMode(byte pinNumber, bool state);
     bool portMode(byte value);
     
-    bool digitalWrite(byte pinNumber, bool state);
+    bool pinWrite(byte pinNumber, bool state);
     bool digitalWritePort(byte value);
             
-    bool digitalRead(byte &pinNumber);
+    bool pinRead(byte &pinNumber);
     bool digitalReadPort(byte &value);
 };
