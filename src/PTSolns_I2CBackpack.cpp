@@ -82,17 +82,17 @@ void Interface::beginLCD(uint8_t cols, uint8_t lines, uint8_t dotsize) {
     _displayfunction |= LCD_5x10DOTS;
   }
 
-  this->pinMode(_rs_pin, OUTPUT);
+  this->pinnMode(_rs_pin, OUTPUT);
   // we can save 1 pin by not using RW. Indicate by passing 255 instead of pin#
   if (_rw_pin != 255) { 
-    this->pinMode(_rw_pin, OUTPUT);
+    this->pinnMode(_rw_pin, OUTPUT);
   }
-  this->pinMode(_enable_pin, OUTPUT);
+  this->pinnMode(_enable_pin, OUTPUT);
   
   // Do these once, instead of every time a character is drawn for speed reasons.
   for (int i=0; i<((_displayfunction & LCD_8BITMODE) ? 8 : 4); ++i)
   {
-    this->pinMode(_data_pins[i], OUTPUT);
+    this->pinnMode(_data_pins[i], OUTPUT);
    } 
 
   // SEE PAGE 45/46 FOR INITIALIZATION SPECIFICATION!
@@ -100,10 +100,10 @@ void Interface::beginLCD(uint8_t cols, uint8_t lines, uint8_t dotsize) {
   // before sending commands. Arduino can turn on way before 4.5 V so we'll wait 50
   delayMicroseconds(50000); 
   // Now we pull both RS and R/W low to begin commands
-  this->digitalWrite(_rs_pin, LOW);
-  this->digitalWrite(_enable_pin, LOW);
+  this->pinWrite(_rs_pin, LOW);
+  this->pinWrite(_enable_pin, LOW);
   if (_rw_pin != 255) { 
-    this->digitalWrite(_rw_pin, LOW);
+    this->pinWrite(_rw_pin, LOW);
   }
   
   //put the LCD into 4 bit or 8 bit mode
@@ -279,11 +279,11 @@ inline size_t Interface::write(uint8_t value) {
 
 // write either command or data, with automatic 4/8-bit selection
 void Interface::send(uint8_t value, uint8_t mode) {
-  this->digitalWrite(_rs_pin, mode);
+  this->pinWrite(_rs_pin, mode);
 
   // if there is a RW pin indicated, set it low to Write
   if (_rw_pin != 255) { 
-    this->digitalWrite(_rw_pin, LOW);
+    this->pinWrite(_rw_pin, LOW);
   }
   
   if (_displayfunction & LCD_8BITMODE) {
@@ -295,17 +295,17 @@ void Interface::send(uint8_t value, uint8_t mode) {
 }
 
 void Interface::pulseEnable(void) {
-  this->digitalWrite(_enable_pin, LOW);
+  this->pinWrite(_enable_pin, LOW);
   delayMicroseconds(1);    
-  this->digitalWrite(_enable_pin, HIGH);
+  this->pinWrite(_enable_pin, HIGH);
   delayMicroseconds(1);    // enable pulse must be >450 ns
-  this->digitalWrite(_enable_pin, LOW);
+  this->pinWrite(_enable_pin, LOW);
   delayMicroseconds(100);   // commands need >37 us to settle
 }
 
 void Interface::write4bits(uint8_t value) {
   for (int i = 0; i < 4; i++) {
-    this->digitalWrite(_data_pins[i], (value >> i) & 0x01);
+    this->pinWrite(_data_pins[i], (value >> i) & 0x01);
   }
 
   pulseEnable();
@@ -313,7 +313,7 @@ void Interface::write4bits(uint8_t value) {
 
 void Interface::write8bits(uint8_t value) {
   for (int i = 0; i < 8; i++) {
-    this->digitalWrite(_data_pins[i], (value >> i) & 0x01);
+    this->pinWrite(_data_pins[i], (value >> i) & 0x01);
   }
   
   pulseEnable();
@@ -345,8 +345,8 @@ void Interface::setClock(unsigned long speed)
 uint8_t Interface::backlight(bool state)
 {
     int err = 0;
-    err += this->pinMode(3, OUTPUT);
-    err += digitalWrite(3, state);
+    err += this->pinnMode(3, OUTPUT);
+    err += pinWrite(3, state);
     return (err > 0) * 10;
 }
 
@@ -389,7 +389,7 @@ bool Interface::twiWrite(byte registerAddress, byte dataWrite)
   	return false;
 }
 
-bool Interface::pinMode(byte pinNumber, bool state)
+bool Interface::pinnMode(byte pinNumber, bool state)
 {
 	byte oldValue = CONFIGPORT;
 	if(this->twiRead(oldValue) && (pinNumber <= 7))
@@ -420,7 +420,7 @@ bool Interface::portMode(byte value)
 }
 
 
-bool Interface::digitalWrite(byte pinNumber, bool state)
+bool Interface::pinWrite(byte pinNumber, bool state)
 {
 	byte oldValue = OUTPUTPORT;
 	if(pinNumber <= 7)
@@ -454,7 +454,7 @@ bool Interface::digitalWritePort(byte value)
 
 
 
-bool Interface::digitalRead(byte &pinNumber)
+bool Interface::pinRead(byte &pinNumber)
 {
 	byte oldValue = INPUTPORT;
 	if(this->twiRead(oldValue) && (pinNumber <= 7))
