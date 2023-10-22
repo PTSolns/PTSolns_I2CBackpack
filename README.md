@@ -10,6 +10,7 @@ The I2C Backpack interfaces with the common 1602 and 2005 LCDs via I2C protocol.
 - Onboard LCD backlight potentiometer.
 - 4-pin screw terminal for I2C signals.
 - QWIIC connector for I2C signals.
+- Eight configurable addresses, with default address 0x3F.
 - Large I2C testing pads for oscilloscope connection.
 
 Various examples are included in this package. For any comments or questions please contact us at contact@PTSolns.com.
