@@ -17,4 +17,5 @@ Various examples are included in this package. For any comments or questions ple
 
 ## Acknowledgements
 The Interface-Shield library incorporates large parts of the following libraries. We wish to give credit to their respective authors.
+- PCA9554.h by AD0ND, GPL-3.0 license, https://github.com/AD0ND/PCA9554
 - LiquidCrystal.h by Hans-Christoph Steiner, GNU Lesser General Public License (LGPL), https://github.com/arduino-libraries/LiquidCrystal
