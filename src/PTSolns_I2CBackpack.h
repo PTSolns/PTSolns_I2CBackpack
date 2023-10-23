@@ -59,7 +59,7 @@
 #define ALLINPUT	0xFF
 
 
-class Interface : public Print
+class I2C_LCD : public Print
 {
 
     public:
