@@ -24,9 +24,6 @@
 // Otherwise, check on the I2C Backpack if any of the three jumper bridges for A0, A1, A2 are closed. If so, change the address accordingly.
 // Otherwise run example "I2C_scanner" and check Serial Monitor for address output.
 //
-// There is an extra function, start_up(), call made in the setup() function. start_up() is not requred. It simply adds three quick LED blinks upon startup or restart. 
-// If the user's micrcontroller does not have a LED_builtIn, simply comment the start_up() function out.
-//
 // HARDWARE CONFIGURATION
 // Connect any microcontroller to the I2C Backpack via the regular I2C pins. User can use either the screw terminal or the QWIIC connection method.
 // It does not matter if the microcontroller is based on 5V or 3.3V. Either will work!
@@ -37,9 +34,6 @@
 I2C_LCD LCD;
 
 void setup() {
-  // Not requried. Called during startup or restart. Blinks onboard LED.
-  startup_blink(13, 4, 50); // (LED_pin, number_of_blink, time_between_blink). 
-
   Wire.begin(); // Uses I2C default pins on whatever microcontroller being used.
 
   LCD.begin(0x3F);   // Use the default address by leaving argument blank, or by specifying 0x3F.
@@ -51,17 +45,4 @@ void setup() {
 
 void loop() {
   // Nothing to do in the main loop for this example.
-}
-
-
-void startup_blink(int const LED_builtIn, int number_of_blink, int time_between_blink) {
-
-  pinMode(LED_builtIn, OUTPUT);
-
-  for (int i = 1; i <= number_of_blink; ++i){
-    digitalWrite(LED_builtIn, HIGH);
-    delay(time_between_blink); 
-    digitalWrite(LED_builtIn, LOW);
-    delay(time_between_blink); 
-  }
 }
