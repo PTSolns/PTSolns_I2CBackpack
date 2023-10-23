@@ -21,10 +21,6 @@
 #include <Wire.h>
 
 I2C_LCD LCD;
-
-int D9 = 9; // The Interface-Shield hardware selection dictates this to be pin D9.
-int dimLevel = 0;
-int dimChange = 5;
    
 void setup(){
   // Not requried. Called during startup or restart. Blinks onboard LED.
