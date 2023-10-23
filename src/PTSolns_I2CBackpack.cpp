@@ -330,7 +330,7 @@ uint8_t I2C_LCD::begin()
 
 uint8_t I2C_LCD::begin(uint8_t addr)
 {
-    if(0x30 <= addr && 0X3F >= addr)
+    if(0x38 <= addr && 0X3F >= addr)
         this->addr = addr;
     else
         return 2;
