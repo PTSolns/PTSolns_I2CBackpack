@@ -18,7 +18,6 @@
 // Prior assembly of the I2C Backpack is assumed (soldering or otherwise connecting the 16 pins of the I2C Backpack with either a 1602 or 2004 LCD.).
 
 #include <PTSolns_I2CBackpack.h>
-#include <Wire.h>
 
 I2C_LCD LCD;
    
