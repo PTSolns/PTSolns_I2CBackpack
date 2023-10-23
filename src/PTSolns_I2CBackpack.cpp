@@ -13,7 +13,7 @@
 //
 // 1. Display clear
 // 2. Function set: 
-//    DL = 1; 8-bit interface data 
+//    DL = 1; 8-bit I2C_LCD data 
 //    N = 0; 1-line display 
 //    F = 0; 5x8 dot character font 
 // 3. Display on/off control: 
@@ -29,13 +29,13 @@
 // LiquidCrystal constructor is called).
 
 
-void Interface::LiquidCrystal(uint8_t rs, uint8_t rw, uint8_t enable, uint8_t d0, uint8_t d1, uint8_t d2, uint8_t d3)
+void I2C_LCD::LiquidCrystal(uint8_t rs, uint8_t rw, uint8_t enable, uint8_t d0, uint8_t d1, uint8_t d2, uint8_t d3)
 {
   init(1, rs, rw, enable, d0, d1, d2, d3, 0, 0, 0, 0);
 }
 
 
-void Interface::setLCD(bool lcdType)
+void I2C_LCD::setLCD(bool lcdType)
 {
     this->lcdType = lcdType;
     
@@ -46,7 +46,7 @@ void Interface::setLCD(bool lcdType)
 }
 
 
-void Interface::init(uint8_t fourbitmode, uint8_t rs, uint8_t rw, uint8_t enable, uint8_t d0, uint8_t d1, uint8_t d2, uint8_t d3, uint8_t d4, uint8_t d5, uint8_t d6, uint8_t d7)
+void I2C_LCD::init(uint8_t fourbitmode, uint8_t rs, uint8_t rw, uint8_t enable, uint8_t d0, uint8_t d1, uint8_t d2, uint8_t d3, uint8_t d4, uint8_t d5, uint8_t d6, uint8_t d7)
 {
   _rs_pin = rs;
   _rw_pin = rw;
@@ -69,7 +69,7 @@ void Interface::init(uint8_t fourbitmode, uint8_t rs, uint8_t rw, uint8_t enable
   beginLCD(16, 1);
 }
 
-void Interface::beginLCD(uint8_t cols, uint8_t lines, uint8_t dotsize) {
+void I2C_LCD::beginLCD(uint8_t cols, uint8_t lines, uint8_t dotsize) {
   if (lines > 1) {
     _displayfunction |= LCD_2LINE;
   }
@@ -123,7 +123,7 @@ void Interface::beginLCD(uint8_t cols, uint8_t lines, uint8_t dotsize) {
     write4bits(0x03); 
     delayMicroseconds(150);
 
-    // finally, set to 4-bit interface
+    // finally, set to 4-bit I2C_LCD
     write4bits(0x02); 
   } else {
     // this is according to the Hitachi HD44780 datasheet
@@ -158,7 +158,7 @@ void Interface::beginLCD(uint8_t cols, uint8_t lines, uint8_t dotsize) {
 
 }
 
-void Interface::setRowOffsets(int row0, int row1, int row2, int row3)
+void I2C_LCD::setRowOffsets(int row0, int row1, int row2, int row3)
 {
   _row_offsets[0] = row0;
   _row_offsets[1] = row1;
@@ -167,19 +167,19 @@ void Interface::setRowOffsets(int row0, int row1, int row2, int row3)
 }
 
 /********** high level commands, for the user! */
-void Interface::clear()
+void I2C_LCD::clear()
 {
   command(LCD_CLEARDISPLAY);  // clear display, set cursor position to zero
   delayMicroseconds(2000);  // this command takes a long time!
 }
 
-void Interface::home()
+void I2C_LCD::home()
 {
   command(LCD_RETURNHOME);  // set cursor position to zero
   delayMicroseconds(2000);  // this command takes a long time!
 }
 
-void Interface::setCursor(uint8_t col, uint8_t row)
+void I2C_LCD::setCursor(uint8_t col, uint8_t row)
 {
   const size_t max_lines = sizeof(_row_offsets) / sizeof(*_row_offsets);
   if ( row >= max_lines ) {
@@ -193,70 +193,70 @@ void Interface::setCursor(uint8_t col, uint8_t row)
 }
 
 // Turn the display on/off (quickly)
-void Interface::noDisplay() {
+void I2C_LCD::noDisplay() {
   _displaycontrol &= ~LCD_DISPLAYON;
   command(LCD_DISPLAYCONTROL | _displaycontrol);
 }
-void Interface::display() {
+void I2C_LCD::display() {
   _displaycontrol |= LCD_DISPLAYON;
   command(LCD_DISPLAYCONTROL | _displaycontrol);
 }
 
 // Turns the underline cursor on/off
-void Interface::noCursor() {
+void I2C_LCD::noCursor() {
   _displaycontrol &= ~LCD_CURSORON;
   command(LCD_DISPLAYCONTROL | _displaycontrol);
 }
-void Interface::cursor() {
+void I2C_LCD::cursor() {
   _displaycontrol |= LCD_CURSORON;
   command(LCD_DISPLAYCONTROL | _displaycontrol);
 }
 
 // Turn on and off the blinking cursor
-void Interface::noBlink() {
+void I2C_LCD::noBlink() {
   _displaycontrol &= ~LCD_BLINKON;
   command(LCD_DISPLAYCONTROL | _displaycontrol);
 }
-void Interface::blink() {
+void I2C_LCD::blink() {
   _displaycontrol |= LCD_BLINKON;
   command(LCD_DISPLAYCONTROL | _displaycontrol);
 }
 
 // These commands scroll the display without changing the RAM
-void Interface::scrollDisplayLeft(void) {
+void I2C_LCD::scrollDisplayLeft(void) {
   command(LCD_CURSORSHIFT | LCD_DISPLAYMOVE | LCD_MOVELEFT);
 }
-void Interface::scrollDisplayRight(void) {
+void I2C_LCD::scrollDisplayRight(void) {
   command(LCD_CURSORSHIFT | LCD_DISPLAYMOVE | LCD_MOVERIGHT);
 }
 
 // This is for text that flows Left to Right
-void Interface::leftToRight(void) {
+void I2C_LCD::leftToRight(void) {
   _displaymode |= LCD_ENTRYLEFT;
   command(LCD_ENTRYMODESET | _displaymode);
 }
 
 // This is for text that flows Right to Left
-void Interface::rightToLeft(void) {
+void I2C_LCD::rightToLeft(void) {
   _displaymode &= ~LCD_ENTRYLEFT;
   command(LCD_ENTRYMODESET | _displaymode);
 }
 
 // This will 'right justify' text from the cursor
-void Interface::autoscroll(void) {
+void I2C_LCD::autoscroll(void) {
   _displaymode |= LCD_ENTRYSHIFTINCREMENT;
   command(LCD_ENTRYMODESET | _displaymode);
 }
 
 // This will 'left justify' text from the cursor
-void Interface::noAutoscroll(void) {
+void I2C_LCD::noAutoscroll(void) {
   _displaymode &= ~LCD_ENTRYSHIFTINCREMENT;
   command(LCD_ENTRYMODESET | _displaymode);
 }
 
 // Allows us to fill the first 8 CGRAM locations
 // with custom characters
-void Interface::createChar(uint8_t location, uint8_t charmap[]) {
+void I2C_LCD::createChar(uint8_t location, uint8_t charmap[]) {
   location &= 0x7; // we only have 8 locations 0-7
   command(LCD_SETCGRAMADDR | (location << 3));
   for (int i=0; i<8; i++) {
@@ -266,11 +266,11 @@ void Interface::createChar(uint8_t location, uint8_t charmap[]) {
 
 /*********** mid level commands, for sending data/cmds */
 
-inline void Interface::command(uint8_t value) {
+inline void I2C_LCD::command(uint8_t value) {
   send(value, LOW);
 }
 
-inline size_t Interface::write(uint8_t value) {
+inline size_t I2C_LCD::write(uint8_t value) {
   send(value, HIGH);
   return 1; // assume success
 }
@@ -278,7 +278,7 @@ inline size_t Interface::write(uint8_t value) {
 /************ low level data pushing commands **********/
 
 // write either command or data, with automatic 4/8-bit selection
-void Interface::send(uint8_t value, uint8_t mode) {
+void I2C_LCD::send(uint8_t value, uint8_t mode) {
   this->pinWrite(_rs_pin, mode);
 
   // if there is a RW pin indicated, set it low to Write
@@ -294,7 +294,7 @@ void Interface::send(uint8_t value, uint8_t mode) {
   }
 }
 
-void Interface::pulseEnable(void) {
+void I2C_LCD::pulseEnable(void) {
   this->pinWrite(_enable_pin, LOW);
   delayMicroseconds(1);    
   this->pinWrite(_enable_pin, HIGH);
@@ -303,7 +303,7 @@ void Interface::pulseEnable(void) {
   delayMicroseconds(100);   // commands need >37 us to settle
 }
 
-void Interface::write4bits(uint8_t value) {
+void I2C_LCD::write4bits(uint8_t value) {
   for (int i = 0; i < 4; i++) {
     this->pinWrite(_data_pins[i], (value >> i) & 0x01);
   }
@@ -311,7 +311,7 @@ void Interface::write4bits(uint8_t value) {
   pulseEnable();
 }
 
-void Interface::write8bits(uint8_t value) {
+void I2C_LCD::write8bits(uint8_t value) {
   for (int i = 0; i < 8; i++) {
     this->pinWrite(_data_pins[i], (value >> i) & 0x01);
   }
@@ -323,12 +323,12 @@ void Interface::write8bits(uint8_t value) {
 //-------------------------------------PCA9554A Instruction Set-----------------------------------------------------
 
 
-uint8_t Interface::begin()
+uint8_t I2C_LCD::begin()
 {
     return InitialSetup();
 }
 
-uint8_t Interface::begin(uint8_t addr)
+uint8_t I2C_LCD::begin(uint8_t addr)
 {
     if(0x30 <= addr && 0X3F >= addr)
         this->addr = addr;
@@ -337,12 +337,12 @@ uint8_t Interface::begin(uint8_t addr)
     return InitialSetup();
 }
 
-void Interface::setClock(unsigned long speed)
+void I2C_LCD::setClock(unsigned long speed)
 {
     Wire.setClock(speed);
 }
 
-uint8_t Interface::backlight(bool state)
+uint8_t I2C_LCD::backlight(bool state)
 {
     int err = 0;
     err += this->pinnMode(3, OUTPUT);
@@ -350,7 +350,7 @@ uint8_t Interface::backlight(bool state)
     return (err > 0) * 10;
 }
 
-uint8_t Interface::InitialSetup()
+uint8_t I2C_LCD::InitialSetup()
 {
     setClock(100000L);
     LiquidCrystal(0, 1, 2, 4, 5, 6, 7);
@@ -362,7 +362,7 @@ uint8_t Interface::InitialSetup()
     return 0;
 }
 
-bool Interface::twiRead(byte &registerAddress)
+bool I2C_LCD::twiRead(byte &registerAddress)
 {
 	Wire.beginTransmission(addr);
   	Wire.write(registerAddress);
@@ -378,7 +378,7 @@ bool Interface::twiRead(byte &registerAddress)
   	return false;
 }
 
-bool Interface::twiWrite(byte registerAddress, byte dataWrite)
+bool I2C_LCD::twiWrite(byte registerAddress, byte dataWrite)
 {
 	Wire.beginTransmission(addr);
   	Wire.write(registerAddress);
@@ -389,7 +389,7 @@ bool Interface::twiWrite(byte registerAddress, byte dataWrite)
   	return false;
 }
 
-bool Interface::pinnMode(byte pinNumber, bool state)
+bool I2C_LCD::pinnMode(byte pinNumber, bool state)
 {
 	byte oldValue = CONFIGPORT;
 	if(this->twiRead(oldValue) && (pinNumber <= 7))
@@ -412,7 +412,7 @@ bool Interface::pinnMode(byte pinNumber, bool state)
 	return false;
 }
 
-bool Interface::portMode(byte value)
+bool I2C_LCD::portMode(byte value)
 {
 	if(this->twiWrite(CONFIGPORT, value))
 		return true;
@@ -420,7 +420,7 @@ bool Interface::portMode(byte value)
 }
 
 
-bool Interface::pinWrite(byte pinNumber, bool state)
+bool I2C_LCD::pinWrite(byte pinNumber, bool state)
 {
 	byte oldValue = OUTPUTPORT;
 	if(pinNumber <= 7)
@@ -445,7 +445,7 @@ bool Interface::pinWrite(byte pinNumber, bool state)
 
 
 
-bool Interface::digitalWritePort(byte value)
+bool I2C_LCD::digitalWritePort(byte value)
 {
 	if(this->twiWrite(OUTPUTPORT, value))
 		return true;
@@ -454,7 +454,7 @@ bool Interface::digitalWritePort(byte value)
 
 
 
-bool Interface::pinRead(byte &pinNumber)
+bool I2C_LCD::pinRead(byte &pinNumber)
 {
 	byte oldValue = INPUTPORT;
 	if(this->twiRead(oldValue) && (pinNumber <= 7))
@@ -468,7 +468,7 @@ bool Interface::pinRead(byte &pinNumber)
 }
 
 
-bool Interface::digitalReadPort(byte &value)
+bool I2C_LCD::digitalReadPort(byte &value)
 {
 	value = INPUTPORT;
 	if(this->twiRead(value))
