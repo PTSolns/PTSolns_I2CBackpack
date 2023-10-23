@@ -1,31 +1,59 @@
+// EXAMPLE: HelloWorld
+// Last update: Oct 22, 2023
+// contact@PTSolns.com
+//
+// DESCRIPTION
+// This example demonstrates the classic HelloWorld print example. 
+// "Hello World!" is printed on the first row. Meanwhile an integer is printed out on the second row and incremented with every loop.
+//
+// Many important settings are not demonstrated in this basic example. 
+// For setting address, I2C frequency, I2C pins (SDA and SCL pins) if they are not defaulted, etc, the user is encouraged to review the other examples in this package.
+//
+// There is an extra function, start_up(), call made in the setup() function. start_up() is not requred. It simply adds three quick LED blinks upon startup or restart. 
+// If the user's micrcontroller does not have a LED_builtIn, simply comment the start_up() function out.
+//
+// HARDWARE CONFIGURATION
+// Connect any microcontroller to the I2C Backpack via the regular I2C pins. User can use either the screw terminal or the QWIIC connection method.
+// It does not matter if the microcontroller is based on 5V or 3.3V. Either will work!
+// Prior assembly of the I2C Backpack is assumed (soldering or otherwise connecting the 16 pins of the I2C Backpack with either a 1602 or 2004 LCD.).
+
 #include <PTSolns_I2CBackpack.h>
+#include <Wire.h>
 
-Interface interface;
+I2C_LCD LCD;
 
-void setup()
-{
-    interface.begin();   // default 0x3F, comment to change address
-    // interface.begin(0x3F);   // uncomment to change address
-    
-    // interface.setLCD(LCD_1602);
-    interface.setLCD(LCD_2004);
-    
-    interface.backlight(ON);
-    interface.clear();
-    interface.setCursor(0, 0);
-    interface.print("Hello World");
-    interface.setCursor(0, 1);
-    interface.print("PTSolns");
-    interface.setCursor(0, 2);
-    interface.print("I2CBackpack");
+void setup() {
+  // Not requried. Called during startup or restart. Blinks onboard LED.
+  startup_blink(13, 4, 50); // (LED_pin, number_of_blink, time_between_blink). 
+
+  Wire.begin(); // Uses I2C default pins on whatever microcontroller being used.
+
+  LCD.begin();   
+  LCD.backlight(ON);
+  LCD.setCursor(0, 0);
+  LCD.print("Hello World!");
 }
 
 int i = 0;
 
-void loop()
-{
-    delay(1000);
-    interface.setCursor(0, 3);
-    interface.print(i);
-    i++;
+void loop() {
+  LCD.setCursor(0, 1);
+  LCD.print(i);
+
+  i++; // Increment counter
+
+  delay(1000); // Wait one second
+}
+
+
+void startup_blink(int const LED_builtIn, int number_of_blink, int time_between_blink) {
+
+  pinMode(LED_builtIn, OUTPUT);
+
+  for (int i = 1; i <= number_of_blink; ++i){
+    digitalWrite(LED_builtIn, HIGH);
+    delay(time_between_blink); 
+    digitalWrite(LED_builtIn, LOW);
+    delay(time_between_blink); 
+  }
 }
