@@ -3,7 +3,7 @@
 // contact@PTSolns.com
 //
 // DESCRIPTION
-// This example shows how to connect a sensor via tha QWIIC conector onboard the I2C Backpack.
+// This example shows how to connect a sensor via the QWIIC conector onboard the I2C Backpack.
 // This will work equally well for the 1602 and the 2004 LCD.
 //
 // Many important settings are not demonstrated in this basic example. 
