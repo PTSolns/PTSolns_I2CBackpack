@@ -422,7 +422,7 @@ bool I2C_LCD::portMode(byte value)
 
 bool I2C_LCD::pinWrite(byte pinNumber, bool state)
 {
-	byte oldValue = OUTPUTPORT;
+	// byte oldValue = OUTPUTPORT;
 	if(pinNumber <= 7)
 	{
 		if(state)
